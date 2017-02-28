@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>抛物线</title>
+    <meta charset="utf-8">
+    <style type="text/css">
+    * {
+        padding: 0;
+        margin: 0;
+    }
+    
+    html,
+    body {
+        height: 100%;
+    }
+    
+    .ball {
+        position: absolute;
+        top: 300px;
+        left: 300px;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background-color: #0096ff;
+    }
+    </style>
+</head>
+
+<body>
+    <div class="ball"></div>
+</body>
+<script>
+(function() {
+
+    // 抛物线公式
+    // y = a * x * x + b * x + c
+
+    var Parabola = function(options) {
+        // 抛物线开始点坐标
+        this.x1 = options.origin.x;
+        this.y1 = -options.origin.y;
+
+        // 抛物线结束点坐标
+        this.x2 = options.target.x;
+        this.y2 = -options.target.y;
+
+
+        if (this.x1 - this.x2 < 0) {
+            this.left = 1;
+        } else {
+            this.left = -1;
+        }
+
+        // this.isLeft = (this.x1-this.x2 > 0);
+
+        // 抛物线运动元素
+        this.el = options.el;
+
+        // 运动速度（x 轴每帧偏移大小）
+        this.speed = options.speed || 10;
+
+        // 抛物线运动完成后的回调
+        this.onMotionDone = options.onMotionDone || constructorFunc;
+
+        // 决定 a 值的大小
+        this.curvature = options.curvature || 1;
+
+        // 已知两点坐标，求 a, b, c 的值。
+        // a > 0 抛物线开口朝上
+        // a < 0 抛物线开口朝下
+        // a 的绝对值大小决定抛物线开口的大小 => 绝对值越小，开口越大。
+        // a 的值根据两点在 y 轴距离和 curvature 值计算
+        //
+        // curvature 值的作用有两点
+        // 1. 决定抛物线开口大小
+        //    值越大，开口越小。
+        // 2. 决定对称轴的位置
+        //    值越大，距离原点（ options.origin ）越近。
+        this.a = Math.pow(Math.sqrt(Math.abs(this.y1 - this.y2)), this.curvature) / 1000;
+        if (options.direction === 'down') this.a = -this.a;
+
+        /**
+         * b 值求解过程
+         *
+         * y1 = a * x1 * x1 + b * x1 + c      c = y1 - a * x1 * x1 - b * x1
+         *                                =>
+         * y2 = a * x2 * x2 + b * x2 + c      c = y2 - a * x2 * x2 - b * x2
+         *
+         * => y1 - a * x1 * x1 - b * x1 = y2 - a * x2 * x2 - b * x2
+         *
+         * => b * x1 - b * x2 = (y1 - a * x1 * x1) - (y2 - a * x2 * x2)
+         *
+         * => b * (x1 - x2) = (y1 - a * x1 * x1) - (y2 - a * x2 * x2)
+         *
+         * => b = ((y1 - a * x1 * x1) - (y2 - a * x2 * x2)) / (x1 - x2)
+         */
+        var t1 = this.y1 - this.a * this.x1 * this.x1;
+        var t2 = this.y2 - this.a * this.x2 * this.x2;
+        this.b = (t1 - t2) / (this.x1 - this.x2);
+        this.c = t1 - this.b * this.x1;
+    }
+
+    Parabola.prototype.start = function() {
+        var self = this;
+
+        requestAnimationFrame(parabola2target);
+
+        var x = self.x1;
+        var y, translateX, translateY;
+
+        function parabola2target() {
+            // 横坐标运动到 x 对应的纵坐标 y 的值
+            y = self.a * x * x + self.b * x + self.c;
+
+            // 在页面中一个元素偏移
+            // x 轴（左右）偏移往左需减，往右需增。
+            // y 轴（上下）偏移往上需减，往下需增。
+            translateX = x - self.x1;
+            translateY = self.y1 - y;
+
+            self.el.style.transform = 'translate3d(' + translateX + 'px, ' + translateY + 'px, 0)';
+
+
+            x += self.left * self.speed;
+
+            if (x != self.x2) {
+                requestAnimationFrame(parabola2target);
+            } else {
+                self.onMotionDone();
+            }
+        }
+    }
+
+    var constructorFunc = function() {};
+
+    window.Parabola = Parabola;
+
+})();
+
+// 使用
+(function() {
+    setInterval(function() {
+        var ball1 = document.createElement('div'),
+            ball2 = document.createElement('div');
+
+        ball1.setAttribute('class', 'ball');
+        ball2.setAttribute('class', 'ball');
+        document.body.insertAdjacentElement('afterbegin', ball1);
+        document.body.insertAdjacentElement('afterbegin', ball2);
+
+
+        var p1 = new Parabola({
+            el: ball1,
+            curvature: 0.7,
+            direction: 'down',
+            speed: 5,
+            origin: {
+                x: 300,
+                y: 300
+            },
+            target: {
+                x: 600,
+                y: 100
+            },
+            onMotionDone: function() {
+                ball1.remove();
+            }
+        });
+        p1.start();
+
+        var p2 = new Parabola({
+            el: ball2,
+            curvature: 0.7,
+            direction: 'up',
+            speed: 5,
+            origin: {
+                x: 300,
+                y: 300
+            },
+            target: {
+                x: 0,
+                y: 100
+            },
+            onMotionDone: function() {
+                ball2.remove();
+            }
+        });
+        p2.start();
+
+
+    }, 1000);
+})();
+</script>
+
+</html>

@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="oneApp">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>weui</title>
+    <link rel="stylesheet" href="css/weui.css">
+    <link rel="stylesheet" href="css/swiper.css">
+</head>
+
+<body>
+    <div ui-view=""></div>
+</body>
+<script src="js/angular.js"></script>
+<script src="js/angular-ui-router.js"></script>
+<script src="./js/swiper.min.js"></script>
+<script src="js/ng-post.js"></script>
+<script>
+var app = angular.module('oneApp', ['controllers', 'directives', 'routers', 'ng.post', 'services']);
+
+//路由
+var routers = angular.module('routers', ['ui.router']);
+routers.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $urlRouterProvider) {
+    $stateProvider.state('index', {
+        url: '/index',
+        controller: 'indexCtrl',
+        templateUrl: 'template/index.html'
+    }).state('index.tuijian', {
+        url: '/tuijian/:id',
+        controller: 'tuijianCtrl',
+        templateUrl: 'template/tuijian.html'
+    }).state('index.hot', {
+        url: '/hot/:id',
+        controller: 'hotCtrl',
+        templateUrl: 'template/hot.html'
+
+    }).state('index.entertainment', {
+        url: '/entertainment/:id',
+        controller: 'entertainmentCtrl',
+        templateUrl: 'template/entertainment.html'
+
+    }).state('index.technology', {
+        url: '/technology/:id',
+        controller: 'technologyCtrl',
+        templateUrl: 'template/technology.html'
+    }).state('search', {
+        url: '/search',
+        controller: 'searchCtrl',
+        templateUrl: 'template/search.html'
+    }).state('detail', {
+        url: '/detail/:id',
+        controller: 'detailCtrl',
+        templateUrl: 'template/detail.html'
+    }).state('index.insert', {
+        url: '/insert/:id',
+        controller: 'insertCtrl',
+        templateUrl: 'template/insert.html'
+    }).state('login', {
+        url: '/login',
+        controller: 'loginCtrl',
+        templateUrl: 'template/login.html'
+    })
+
+    $urlRouterProvider.when('', '/index/tuijian/6')
+}]).run(['$http','cookie','$window',function($http,cookie,$window) {
+    $http.post('http://10.16.155.28:81/news/php/index.php/login_api/auto_login', {
+        params: {
+            username: cookie.getCookie('username'),
+            token: cookie.getCookie('token')
+        }
+    }).success(function(data) {
+        console.log(data)
+        if (data) {
+            //success
+        } else {
+            $window.location.href = '#/login'
+        }
+    })
+}]);
+var controllers = angular.module('controllers', []);
+
+controllers.controller('indexCtrl', ['$scope', '$http', 'cookie', '$window', function($scope, $http, cookie, $window) {
+
+    $scope.tabs = 1;
+    $scope.changeTab = function(tabs) {
+        $scope.tabs = tabs;
+    }
+    $scope.isSearch = false;
+    $scope.search = function() {
+        $scope.isSearch = true;
+    }
+    $scope.cancel = function() {
+        $scope.searchName = ''
+        $scope.isSearch = false
+    }
+    $scope.searchName = '';
+
+
+
+
+}]).controller('tuijianCtrl', ['$scope', '$http', '$state', 'cookie', '$window', function($scope, $http, $state, cookie, $window) {
+    // $http.post('http://10.16.155.28:81/news/php/index.php/login_api/auto_login', {
+    //     params: {
+    //         username: cookie.getCookie('username'),
+    //         token: cookie.getCookie('token')
+    //     }
+    // }).success(function(data) {
+    //     console.log(data)
+    //     if (data) {
+    //         //success
+    //     } else {
+    //         $window.location.href = '#/login'
+    //     }
+    // })
+    $scope.isShowActionSheet = false
+    $scope.showActionSheet = function() {
+        $scope.isShowActionSheet = true
+    }
+    $scope.hideActionSheet = function() {
+        $scope.isShowActionSheet = false
+    }
+
+    $scope.isLoadMore = false
+    $scope.page = 1;
+    $scope.news = [];
+    $scope.sort = true;
+    $scope.loadMore = function() {
+        $scope.isLoadMore = false;
+        $http.get('js/show_list.json', {
+            params: {
+                page: $scope.page++,
+                channel_id: $state.params.id
+            }
+        }).success(function(data) {
+            console.log(data);
+            $scope.news = $scope.news.concat(data.news_list)
+            $scope.isLoadMore = true
+        })
+    }
+    $scope.loadMore();
+}]).controller('hotCtrl', ['$scope', '$http', '$state', function($scope, $http, $state) {
+
+    $scope.isShowActionSheet = false
+    $scope.showActionSheet = function() {
+        $scope.isShowActionSheet = true
+    }
+    $scope.hideActionSheet = function() {
+        $scope.isShowActionSheet = false
+    }
+
+    $scope.isLoadMore = false
+    $scope.page = 1;
+    $scope.news = [];
+    $scope.sort = true;
+    $scope.loadMore = function() {
+        $scope.isLoadMore = false;
+        $http.get('http://10.16.155.28:81/news/php/index.php/news_api/show_detail_by_channel_id', {
+            params: {
+                page: $scope.page++,
+                channel_id: $state.params.id
+            }
+        }).success(function(data) {
+            console.log(data);
+            $scope.news = $scope.news.concat(data.news_list)
+            $scope.isLoadMore = true
+        })
+    }
+    $scope.loadMore();
+}]).controller('entertainmentCtrl', ['$scope', '$http', '$state', function($scope, $http, $state) {
+
+    $scope.isShowActionSheet = false
+    $scope.showActionSheet = function() {
+        $scope.isShowActionSheet = true
+    }
+    $scope.hideActionSheet = function() {
+        $scope.isShowActionSheet = false
+    }
+
+    $scope.isLoadMore = false
+    $scope.page = 1;
+    $scope.news = [];
+    $scope.sort = true;
+    $scope.loadMore = function() {
+        $scope.isLoadMore = false;
+        $http.get('http://10.16.155.28:81/news/php/index.php/news_api/show_detail_by_channel_id', {
+            params: {
+                page: $scope.page++,
+                channel_id: $state.params.id
+            }
+        }).success(function(data) {
+            console.log(data);
+            $scope.news = $scope.news.concat(data.news_list)
+            $scope.isLoadMore = true
+        })
+    }
+    $scope.loadMore();
+}]).controller('technologyCtrl', ['$scope', '$http', '$state', function($scope, $http, $state) {
+
+    $scope.isShowActionSheet = false
+    $scope.showActionSheet = function() {
+        $scope.isShowActionSheet = true
+    }
+    $scope.hideActionSheet = function() {
+        $scope.isShowActionSheet = false
+    }
+
+    $scope.isLoadMore = false;
+    // $scope.isBlack=false;
+    $scope.page = 1;
+    $scope.news = [];
+    $scope.sort = true;
+    $scope.loadMore = function() {
+        $scope.isLoadMore = true;
+        // $scope.isBlack=true;
+        //js/show_list.json
+        $http.get('http://10.16.155.28:81/news/php/index.php/news_api/show_detail_by_channel_id', {
+            params: {
+                page: $scope.page++,
+                channel_id: $state.params.id
+            }
+        }).success(function(data) {
+            console.log(data);
+            $scope.news = $scope.news.concat(data.news_list)
+            $scope.isLoadMore = true
+                // $scope.isBlack=false;
+        })
+    }
+    $scope.loadMore();
+}]).controller('detailCtrl', ['$scope', '$http', '$state', '$sce', function($scope, $http, $state, $sce) {
+    console.log($state.params.id);
+    $http.get('http://10.16.155.28:81/news/php/index.php/news_api/show_detail', {
+        params: {
+            id: $state.params.id
+        }
+    }).success(function(data) {
+        console.log(data)
+            //$scope.html = $sce.trustAsHtml(data.news_list[0].text)
+        $scope.new = data.news_list[0]
+    })
+    $scope.isGallery = false;
+    $scope.imgUrl = '';
+    $scope.gallery = function(imgUrl) {
+        $scope.isGallery = true
+        $scope.imgUrl = imgUrl;
+    }
+}]).controller('insertCtrl', ['$scope', '$http', function($scope, $http) {
+
+    $scope.submit = function() {
+        console.log($scope.title)
+        console.log($scope.text)
+        $http.get('http://10.16.155.28:81/news/php/index.php/news_api/insert_news', {
+            params: {
+                title: $scope.title,
+                text: $scope.text
+            }
+        }).success(function(data) {
+            console.log(data)
+        })
+    }
+}]).controller('loginCtrl', ['$scope', '$http', 'cookie', '$window', function($scope, $http, cookie, $window) {
+    $scope.login = function() {
+        //POST
+        //url:http://10.16.155.28:81/news/php/index.php/news_api/register
+        //params:username,password
+        console.log($scope.username);
+        console.log($scope.password);
+
+        $http.post('http://10.16.155.28:81/news/php/index.php/login_api/login', {
+            params: {
+                username: $scope.username,
+                password: $scope.password
+            }
+        }).success(function(data) {
+            console.log(data);
+            if (data.code == 0) {
+                alert('登录失败')
+            } else if (data.code == 1) {
+                cookie.setCookie('username', data.user_name);
+                cookie.setCookie('token', data.info.token);
+                $window.location.href = '#/index/tuijian/6'
+            }
+        })
+    }
+
+    $scope.register = function() {
+        //POST
+        //url:http://10.16.155.28:81/news/php/index.php/news_api/register
+        //params:username,password
+        console.log($scope.username);
+        console.log($scope.password);
+
+        $http.post('http://10.16.155.28:81/news/php/index.php/login_api/register', {
+            params: {
+                username: $scope.username,
+                password: $scope.password
+            }
+        }).success(function(data) {
+            console.log(data);
+
+           if (data.code == 0) {
+                alert('注册失败!请检查用户名是否规范')
+            } else if (data.code == 1) {
+               alert('注册成功,请登录!')
+            }
+                //$document.cookie('token',data.)
+                // cookie.setCookie('username', data.user_name);
+                // cookie.setCookie('token', data.info.token);
+
+
+        })
+    }
+}])
+
+
+
+//服务
+var services = angular.module('services', []);
+
+services.service('cookie', ['$document', function($document) {
+    return {
+        setCookie: function(name, value) {
+            var days = 10;
+            var ex = new Date();
+            ex.setTime(ex.getTime() + days * 24 * 60 * 60 * 1000);
+            $document[0].cookie = name + "=" + value + ";expires=" + ex;
+        },
+        getCookie: function(name) {
+            var a;
+            var reg = new RegExp("(^|)" + name + "=([^;]*)(;|$)");
+            if (a = $document[0].cookie.match(reg)) {
+                return a[2];
+            }
+        }
+    }
+}])
+
+var directives = angular.module('directives', []);
+directives.directive('wheader', function() {
+    return {
+        templateUrl: 'directive/wheader.html'
+    }
+}).directive('wcarousel', function() {
+    return {
+        templateUrl: 'directive/carousel.html',
+        link: function(scope, ele, attr) {
+            var swiper = new Swiper('.swiper-container', {
+                pagination: '.swiper-pagination',
+                // effect: 'cube',
+                grabCursor: true,
+                autoplay: 4000,
+                loop: true,
+                autoplayDisableOnInteraction: false,
+                loopAdditionalSlides: 1,
+                // cube: {
+                //     // shadow: true,
+                //     slideShadows: true,
+                //     shadowOffset: 20,
+                //     shadowScale: 0.94
+                // }
+            });
+        }
+    }
+}).directive('wsearch', function() {
+    return {
+        templateUrl: 'directive/wsearch.html'
+    }
+}).directive('wactionsheet', function() {
+    return {
+        templateUrl: 'directive/wactionsheet.html'
+    }
+}).directive('wpanel', function() {
+    return {
+        templateUrl: 'directive/wpanel.html'
+    }
+}).directive('hcarousel', function() {
+    return {
+        templateUrl: 'directive/hcarousel.html',
+        link: function(scope, ele, attr) {
+            var swiper = new Swiper('.swiper-container', {
+                pagination: '.swiper-pagination',
+                // effect: 'cube',
+                grabCursor: true,
+                autoplay: 4000,
+                loop: true,
+                autoplayDisableOnInteraction: false,
+                loopAdditionalSlides: 1,
+                // cube: {
+                //     // shadow: true,
+                //     slideShadows: true,
+                //     shadowOffset: 20,
+                //     shadowScale: 0.94
+                // }
+            });
+        }
+    }
+}).directive('ecarousel', function() {
+    return {
+        templateUrl: 'directive/ecarousel.html',
+        link: function(scope, ele, attr) {
+            var swiper = new Swiper('.swiper-container', {
+                pagination: '.swiper-pagination',
+                // effect: 'cube',
+                grabCursor: true,
+                autoplay: 4000,
+                loop: true,
+                autoplayDisableOnInteraction: false,
+                loopAdditionalSlides: 1,
+                // cube: {
+                //     // shadow: true,
+                //     slideShadows: true,
+                //     shadowOffset: 20,
+                //     shadowScale: 0.94
+                // }
+            });
+        }
+    }
+}).directive('tcarousel', function() {
+    return {
+        templateUrl: 'directive/tcarousel.html',
+        link: function(scope, ele, attr) {
+            var swiper = new Swiper('.swiper-container', {
+                pagination: '.swiper-pagination',
+                // effect: 'cube',
+                grabCursor: true,
+                autoplay: 4000,
+                loop: true,
+                autoplayDisableOnInteraction: false,
+                loopAdditionalSlides: 1,
+                // cube: {
+                //     // shadow: true,
+                //     slideShadows: true,
+                //     shadowOffset: 20,
+                //     shadowScale: 0.94
+                // }
+            });
+        }
+    }
+})
+</script>
+
+</html>

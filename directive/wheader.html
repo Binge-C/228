@@ -1,0 +1,21 @@
+<div class="weui-tab">
+    <div class="weui-navbar weui-fixed">
+        <div class="weui-navbar__item" ng-class="{'weui-bar__item_on':tabs==1}">
+            <a href="#/index/tuijian/6" ng-click="changeTab(1)" style="display:block">推荐</a>
+        </div>
+        <div class="weui-navbar__item {{tabs}}" ng-class="{'weui-bar__item_on':tabs==2}">
+            <a href="#/index/hot/7" ng-click="changeTab(2)" style="display:block">热点</a>
+        </div>
+        <div class="weui-navbar__item" ng-class="{'weui-bar__item_on':tabs==3}">
+            <a href="#/index/entertainment/8" ng-click="changeTab(3)" style="display:block">娱乐</a>
+        </div>
+        <div class="weui-navbar__item" ng-class="{'weui-bar__item_on':tabs==4}">
+            <a href="#/index/technology/9" ng-click="changeTab(4)" style="display:block">科技</a>
+        </div>
+        <div class="weui-navbar__item" ng-class="{'weui-bar__item_on':tabs==5}">
+            <a href="#/index/insert/10" ng-click="changeTab(5)" style="display:block">添加</a>
+        </div>
+    </div>
+    <div class="weui-tab__panel">
+    </div>
+</div>
